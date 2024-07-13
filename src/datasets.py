@@ -529,8 +529,8 @@ class SequenceRecurrent(Sequence):
 class DatasetProvider:
     def __init__(self, dataset_path: Path, representation_type: RepresentationType, delta_t_ms: int = 100, num_bins=4,
                 config=None, visualize=False):
-        test_path = Path(os.path.join(dataset_path, 'test'))
-        train_path = Path(os.path.join(dataset_path, 'train'))
+        test_path = Path(os.path.join(dataset_path, 'EventCamera-test/test'))
+        train_path = Path(os.path.join(dataset_path, 'EventCamera-train/train'))
         assert dataset_path.is_dir(), str(dataset_path)
         assert test_path.is_dir(), str(test_path)
         assert delta_t_ms == 100
