@@ -30,6 +30,52 @@ class EVFlowNet(nn.Module):
                         out_channels=int(_BASE_CHANNELS/2), do_batch_norm=not self._args.no_batch_norm)
 
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        batch_size=inputs.size()[0]
+        flows=[]
+        for i in range(batch_size):
+            if i < batch_size - 1:
+                # バッチの中から連続する2枚取り出す
+                batch_slice = inputs[i:i+2]
+            else:
+                # 最後のスライスは同じ画像を2回使用
+                batch_slice = inputs[-1:].repeat(2, 1, 1, 1)
+            # encoder
+            skip_connections = {}
+            inputs = self.encoder1(batch_slice)
+            skip_connections['skip0'] = inputs.clone()
+            inputs = self.encoder2(inputs)
+            skip_connections['skip1'] = inputs.clone()
+            inputs = self.encoder3(inputs)
+            skip_connections['skip2'] = inputs.clone()
+            inputs = self.encoder4(inputs)
+            skip_connections['skip3'] = inputs.clone()
+    
+            # transition
+            inputs = self.resnet_block(inputs)
+    
+            # decoder
+
+            flow_dict = {}
+            inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
+            inputs, flow = self.decoder1(inputs)
+            flow_dict['flow0'] = flow.clone()
+            
+            inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
+            inputs, flow = self.decoder2(inputs)
+            flow_dict['flow1'] = flow.clone()
+    
+            inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
+            inputs, flow = self.decoder3(inputs)
+            flow_dict['flow2'] = flow.clone()
+    
+            inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
+            inputs, flow = self.decoder4(inputs)
+            flow_dict['flow3'] = flow.clone()
+
+            flows.append(flow[0:1])
+            
+        return torch.cat(flows, dim=0)
+        '''    
         # encoder
         skip_connections = {}
         inputs = self.encoder1(inputs)
@@ -72,7 +118,7 @@ class EVFlowNet(nn.Module):
         #print(flow.shape)
         
         return flow3
-        
+        '''
 
 # if __name__ == "__main__":
 #     from config import configs
