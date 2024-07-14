@@ -36,11 +36,10 @@ class EVFlowNet(nn.Module):
         for i in range(batch_size - 1):
             # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
             batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=0)
-            batch_slice.unsqueeze(0)
             
             # encoder
             skip_connections = {}
-            inputs = self.encoder1(batch_slice)
+            inputs = self.encoder1(batch_slice.unsqueeze(0))
             skip_connections['skip0'] = inputs.clone()
             inputs = self.encoder2(inputs)
             skip_connections['skip1'] = inputs.clone()
@@ -74,11 +73,11 @@ class EVFlowNet(nn.Module):
             flows.append(flow)
             
         # 最後のペアは同じ画像を2回使用
-        batch_slice = torch.cat((inputs[-1], inputs[-1]), dim=0).unsqueeze(0)
+        batch_slice = torch.cat((inputs[-1], inputs[-1]), dim=0)
         
         # encoder
         skip_connections = {}
-        inputs = self.encoder1(batch_slice)
+        inputs = self.encoder1(batch_slice.unsqueeze(0))
         skip_connections['skip0'] = inputs.clone()
         inputs = self.encoder2(inputs)
         skip_connections['skip1'] = inputs.clone()
