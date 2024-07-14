@@ -32,7 +32,7 @@ class EVFlowNet(nn.Module):
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         #print(inputs.size(0),inputs[1])
         batch_size=inputs.size(0)
-        batch_slice=[i for _ in range(batch_size)]
+        batch_slice=[i for i in range(batch_size)]
         #flows=[]
         for i in range(batch_size - 1):
             # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
