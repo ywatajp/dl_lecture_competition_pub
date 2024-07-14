@@ -87,12 +87,14 @@ def main(args: DictConfig):
                                  batch_size=args.data_loader.train.batch_size,
                                  shuffle=args.data_loader.train.shuffle,
                                  collate_fn=collate_fn,
-                                 drop_last=False)
+                                 drop_last=False,
+                                 num_workers=os.cpu_count())
     test_data = DataLoader(test_set,
                                  batch_size=args.data_loader.test.batch_size,
                                  shuffle=args.data_loader.test.shuffle,
                                  collate_fn=collate_fn,
-                                 drop_last=False)
+                                 drop_last=False,
+                                 num_workers=os.cpu_count())
 
     '''
     train data:
