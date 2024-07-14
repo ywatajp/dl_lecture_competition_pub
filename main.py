@@ -115,7 +115,11 @@ def main(args: DictConfig):
     #       Model
     # ------------------
     model = EVFlowNet(args.train).to(device)
-
+    # 複数GPU使用宣言
+    if device == 'cuda':
+        model = torch.nn.DataParallel(model) # make parallel
+        torch.backends.cudnn.benchmark = True
+    
     # ------------------
     #   optimizer
     # ------------------
