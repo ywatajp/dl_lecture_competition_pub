@@ -71,7 +71,7 @@ class EVFlowNet(nn.Module):
         #total_flow+=flow
         #print(flow.shape)
         
-        return flow0,flow1,flow2,flow3
+        return flow3
         
 
 # if __name__ == "__main__":
