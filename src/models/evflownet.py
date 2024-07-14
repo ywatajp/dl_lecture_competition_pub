@@ -32,52 +32,17 @@ class EVFlowNet(nn.Module):
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         #print(inputs.size(0),inputs[1])
         batch_size=inputs.size(0)
-        flows=[]
+        batch_slice=[i for _ in range(batch_size)]
+        #flows=[]
         for i in range(batch_size - 1):
             # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
-            batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=0)
-            
-            # encoder
-            skip_connections = {}
-            inputs = self.encoder1(batch_slice.unsqueeze(0))
-            skip_connections['skip0'] = inputs.clone()
-            inputs = self.encoder2(inputs)
-            skip_connections['skip1'] = inputs.clone()
-            inputs = self.encoder3(inputs)
-            skip_connections['skip2'] = inputs.clone()
-            inputs = self.encoder4(inputs)
-            skip_connections['skip3'] = inputs.clone()
-    
-            # transition
-            inputs = self.resnet_block(inputs)
-    
-            # decoder
-
-            flow_dict = {}
-            inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
-            inputs, flow = self.decoder1(inputs)
-            flow_dict['flow0'] = flow.clone()
-            
-            inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
-            inputs, flow = self.decoder2(inputs)
-            flow_dict['flow1'] = flow.clone()
-    
-            inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
-            inputs, flow = self.decoder3(inputs)
-            flow_dict['flow2'] = flow.clone()
-    
-            inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
-            inputs, flow = self.decoder4(inputs)
-            flow_dict['flow3'] = flow.clone()
-
-            flows.append(flow)
-            
+            batch_slice[i] = torch.cat((inputs[i], inputs[i+1]), dim=0)
         # 最後のペアは同じ画像を2回使用
-        batch_slice = torch.cat((inputs[-1], inputs[-1]), dim=0)
-        
+        batch_slice[batch_size - 1] = torch.cat((inputs[-1], inputs[-1]), dim=0)
+            
         # encoder
         skip_connections = {}
-        inputs = self.encoder1(batch_slice.unsqueeze(0))
+        inputs = self.encoder1(batch_slice)
         skip_connections['skip0'] = inputs.clone()
         inputs = self.encoder2(inputs)
         skip_connections['skip1'] = inputs.clone()
@@ -108,9 +73,7 @@ class EVFlowNet(nn.Module):
         inputs, flow = self.decoder4(inputs)
         flow_dict['flow3'] = flow.clone()
 
-        flows.append(flow)
-        
-        return torch.cat(flows, dim=0)
+        return flow
         '''    
         # encoder
         skip_connections = {}
