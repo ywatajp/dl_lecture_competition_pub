@@ -10,7 +10,7 @@ class EVFlowNet(nn.Module):
         super(EVFlowNet,self).__init__()
         self._args = args
 
-        self.encoder1 = general_conv2d(in_channels = 4, out_channels=_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
+        self.encoder1 = general_conv2d(in_channels = 8, out_channels=_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
         self.encoder2 = general_conv2d(in_channels = _BASE_CHANNELS, out_channels=2*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
         self.encoder3 = general_conv2d(in_channels = 2*_BASE_CHANNELS, out_channels=4*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
         self.encoder4 = general_conv2d(in_channels = 4*_BASE_CHANNELS, out_channels=8*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
@@ -34,7 +34,7 @@ class EVFlowNet(nn.Module):
         flows=[]
         for i in range(batch_size - 1):
             # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
-            batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=1)
+            batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=0).unsqueeze(0)
             
             # encoder
             skip_connections = {}
@@ -69,10 +69,10 @@ class EVFlowNet(nn.Module):
             inputs, flow = self.decoder4(inputs)
             flow_dict['flow3'] = flow.clone()
 
-            flows.append(flow.unsqueeze(0))
+            flows.append(flow)
             
         # 最後のペアは同じ画像を2回使用
-        batch_slice = torch.cat((inputs[-1], inputs[-1]), dim=1)
+        batch_slice = torch.cat((inputs[-1], inputs[-1]), dim=0).unsqueeze(0)
         
         # encoder
         skip_connections = {}
@@ -107,7 +107,7 @@ class EVFlowNet(nn.Module):
         inputs, flow = self.decoder4(inputs)
         flow_dict['flow3'] = flow.clone()
 
-        flows.append(flow.unsqueeze(0))
+        flows.append(flow)
         
         return torch.cat(flows, dim=0)
         '''    
