@@ -88,13 +88,15 @@ def main(args: DictConfig):
                                  shuffle=args.data_loader.train.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 num_workers=os.cpu_count())
+                                 num_workers=os.cpu_count(),
+                                 pin_memory=True)
     test_data = DataLoader(test_set,
                                  batch_size=args.data_loader.test.batch_size,
                                  shuffle=args.data_loader.test.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 num_workers=os.cpu_count())
+                                 num_workers=os.cpu_count(),
+                                 pin_memory=True)
 
     '''
     train data:
