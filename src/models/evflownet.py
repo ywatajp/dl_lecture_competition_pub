@@ -30,12 +30,13 @@ class EVFlowNet(nn.Module):
                         out_channels=int(_BASE_CHANNELS/2), do_batch_norm=not self._args.no_batch_norm)
 
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        print(inputs.size(0),inputs[1])
+        #print(inputs.size(0),inputs[1])
         batch_size=inputs.size(0)
         flows=[]
         for i in range(batch_size - 1):
             # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
-            batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=0).unsqueeze(0)
+            batch_slice = torch.cat((inputs[i], inputs[i+1]), dim=0)
+            batch_slice.unsqueeze(0)
             
             # encoder
             skip_connections = {}
