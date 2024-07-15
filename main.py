@@ -97,7 +97,7 @@ def main(args: DictConfig):
                                  num_workers=os.cpu_count(),
                                  pin_memory=True)
     train_size = len(train_data)
-    test_size = len(test_dat)
+    test_size = len(test_data)
     print(train_size, test_size)
     '''
     train data:
