@@ -133,7 +133,15 @@ def main(args: DictConfig):
         print("on epoch: {}".format(epoch+1))
         for i, batch in enumerate(tqdm(train_data)):
             batch: Dict[str, Any]
-            event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
+            batch_size = batch.size(0)  # バッチサイズを取得
+            batch_slice=[]
+            for j in range(batch_size - 1):
+                # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
+                batch_slice.append(torch.cat((batch[j], batch[j + 1]), dim=0))
+            # 最後のペアは同じ画像を2回使用
+            batch_slice.append(torch.cat((batch[-1], batch[-1]), dim=0)) 
+            event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
+            #event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
             flow = model(event_image) # [B, 2, 480, 640]
             loss: torch.Tensor = compute_epe_error(flow, ground_truth_flow)
