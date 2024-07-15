@@ -97,8 +97,9 @@ def main(args: DictConfig):
                                  drop_last=False,
                                  num_workers=os.cpu_count(),
                                  pin_memory=True)
-    train_size = train_data.size(0)
-    test_size = test_data.size(0)
+    train_size = math.ceil(train_set.size(0) / args.data_loader.test.batch_size)
+    test_size = math.ceil(test_set.size(0) / args.data_loader.test.batch_size)
+    print(train_size, test_size)
     '''
     train data:
         Type of batch: Dict
