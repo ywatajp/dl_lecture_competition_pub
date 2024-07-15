@@ -97,7 +97,8 @@ def main(args: DictConfig):
                                  drop_last=False,
                                  num_workers=os.cpu_count(),
                                  pin_memory=True)
-
+    train_size = train_data.size(0)
+    test_size = test_data.size(0)
     '''
     train data:
         Type of batch: Dict
@@ -138,11 +139,20 @@ def main(args: DictConfig):
             batch_size = event_image.size(0)  # バッチサイズを取得
             batch_slice=[]
             for j in range(batch_size - 1):
-                # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
-                batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
                 print(seq[j],seq[j+1])
-            # 最後のペアは同じ画像を2回使用
-            batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
+                if seq[j] == seq[j+1]:
+                    # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
+                    batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
+                else:
+                    # 同じ画像を2回使用
+                    batch_slice.append(torch.cat((event_image[j], event_image[j]), dim=0)) 
+            if i < train_size -1:
+                if seq[-1] == train_data[i+1]["seq_name"][0]:
+                    batch_slice.append(torch.cat((event_image[-1],train_data[i+1]["event_volume"][0]), dim=0)) 
+                else: # 同じ画像を2回使用
+                    batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
+            else: # 同じ画像を2回使用
+                batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
             #event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
@@ -176,7 +186,7 @@ def main(args: DictConfig):
     flow: torch.Tensor = torch.tensor([]).to(device)
     with torch.no_grad():
         print("start test")
-        for batch in tqdm(test_data):
+        for i, batch in tqdm(test_data):
             batch: Dict[str, Any]
             #event_image = batch["event_volume"].to(device)
             event_image = batch["event_volume"] # [B, 4, 480, 640]
@@ -185,8 +195,10 @@ def main(args: DictConfig):
             for j in range(batch_size - 1):
                 # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
                 batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
-            # 最後のペアは同じ画像を2回使用
-            batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
+            if i < test_size -1:
+                batch_slice.append(torch.cat((event_image[-1],test_data[i+1]["event_volume"][0]), dim=0)) 
+            else:# 最後のペアは同じ画像を2回使用
+                batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
             batch_flow = model(event_image) # [1, 2, 480, 640]
             flow = torch.cat((flow, batch_flow['flow3']), dim=0)  # [N, 2, 480, 640]
