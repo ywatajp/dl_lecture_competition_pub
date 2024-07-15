@@ -173,7 +173,16 @@ def main(args: DictConfig):
         print("start test")
         for batch in tqdm(test_data):
             batch: Dict[str, Any]
-            event_image = batch["event_volume"].to(device)
+            #event_image = batch["event_volume"].to(device)
+            event_image = batch["event_volume"] # [B, 4, 480, 640]
+            batch_size = event_image.size(0)  # バッチサイズを取得
+            batch_slice=[]
+            for j in range(batch_size - 1):
+                # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
+                batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
+            # 最後のペアは同じ画像を2回使用
+            batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
+            event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
             batch_flow = model(event_image) # [1, 2, 480, 640]
             flow = torch.cat((flow, batch_flow), dim=0)  # [N, 2, 480, 640]
         print("test done")
