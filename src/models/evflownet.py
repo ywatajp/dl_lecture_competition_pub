@@ -49,21 +49,21 @@ class EVFlowNet(nn.Module):
         flow_dict = {}
         inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
         inputs, flow = self.decoder1(inputs)
+        shape = flow.shape
+        flow = nn.functional.interpolate(flow,size=[shape[2]*8,shape[3]*8],mode='nearest')
         flow_dict['flow0'] = flow.clone()
-        #total_flow+=flow
-        #print(flow.shape)
         
         inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
         inputs, flow = self.decoder2(inputs)
+        shape = flow.shape
+        flow = nn.functional.interpolate(flow,size=[shape[2]*4,shape[3]*4],mode='nearest')
         flow_dict['flow1'] = flow.clone()
-        #total_flow+=flow
-        #print(flow.shape)
 
         inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
         inputs, flow = self.decoder3(inputs)
+        shape = flow.shape
+        flow = nn.functional.interpolate(flow,size=[shape[2]*2,shape[3]*2],mode='nearest')
         flow_dict['flow2'] = flow.clone()
-        #total_flow+=flow
-        #print(flow.shape)
 
         inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
         inputs, flow = self.decoder4(inputs)
