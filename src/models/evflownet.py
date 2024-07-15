@@ -29,56 +29,7 @@ class EVFlowNet(nn.Module):
         self.decoder4 = upsample_conv2d_and_predict_flow(in_channels=2*_BASE_CHANNELS+2,
                         out_channels=int(_BASE_CHANNELS/2), do_batch_norm=not self._args.no_batch_norm)
 
-    def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        '''
-        #print(inputs.size(0),inputs[1])
-        batch_size=inputs.size(0)
-        batch_slice=[]
-        #flows=[]
-        for i in range(batch_size - 1):
-            # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
-            batch_slice.append(torch.cat((inputs[i], inputs[i+1]), dim=0))
-        # 最後のペアは同じ画像を2回使用
-        batch_slice.append(torch.cat((inputs[-1], inputs[-1]), dim=0))
-
-        batch_slice=torch.stack(batch_slice)
-        print(batch_slice.size())
-        
-        # encoder
-        skip_connections = {}
-        inputs = self.encoder1(batch_slice)
-        skip_connections['skip0'] = inputs.clone()
-        inputs = self.encoder2(inputs)
-        skip_connections['skip1'] = inputs.clone()
-        inputs = self.encoder3(inputs)
-        skip_connections['skip2'] = inputs.clone()
-        inputs = self.encoder4(inputs)
-        skip_connections['skip3'] = inputs.clone()
-
-        # transition
-        inputs = self.resnet_block(inputs)
-
-        # decoder
-
-        flow_dict = {}
-        inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
-        inputs, flow = self.decoder1(inputs)
-        flow_dict['flow0'] = flow.clone()
-        
-        inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
-        inputs, flow = self.decoder2(inputs)
-        flow_dict['flow1'] = flow.clone()
-
-        inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
-        inputs, flow = self.decoder3(inputs)
-        flow_dict['flow2'] = flow.clone()
-
-        inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
-        inputs, flow = self.decoder4(inputs)
-        flow_dict['flow3'] = flow.clone()
-
-        return flow
-        '''    
+    def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]: 
         # encoder
         skip_connections = {}
         inputs = self.encoder1(inputs)
@@ -120,7 +71,7 @@ class EVFlowNet(nn.Module):
         #total_flow+=flow
         #print(flow.shape)
         
-        return flow
+        return flow_dict
 
 # if __name__ == "__main__":
 #     from config import configs
