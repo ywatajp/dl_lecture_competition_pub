@@ -134,11 +134,13 @@ def main(args: DictConfig):
         for i, batch in enumerate(tqdm(train_data)):
             batch: Dict[str, Any]
             event_image = batch["event_volume"] # [B, 4, 480, 640]
+            seq = batch["seq_name"]
             batch_size = event_image.size(0)  # バッチサイズを取得
             batch_slice=[]
             for j in range(batch_size - 1):
                 # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
                 batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
+                print(seq[j],seq[j+1])
             # 最後のペアは同じ画像を2回使用
             batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
