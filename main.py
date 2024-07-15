@@ -131,6 +131,8 @@ def main(args: DictConfig):
     model.train()
     for epoch in range(args.train.epochs):
         total_loss = 0
+        iterator = iter(train_data)
+        current_batch = next(iterator)
         print("on epoch: {}".format(epoch+1))
         for i, batch in enumerate(tqdm(train_data)):
             batch: Dict[str, Any]
@@ -147,8 +149,9 @@ def main(args: DictConfig):
                     # 同じ画像を2回使用
                     batch_slice.append(torch.cat((event_image[j], event_image[j]), dim=0)) 
             if i < train_size -1:
-                if seq[-1] == train_data[i+1]["seq_name"][0]:
-                    batch_slice.append(torch.cat((event_image[-1],train_data[i+1]["event_volume"][0]), dim=0)) 
+                next_batch = next(iterator)
+                if seq[-1] == next_batch["seq_name"][0]:
+                    batch_slice.append(torch.cat((event_image[-1],next_batch["event_volume"][0]), dim=0)) 
                 else: # 同じ画像を2回使用
                     batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             else: # 同じ画像を2回使用
@@ -186,6 +189,8 @@ def main(args: DictConfig):
     flow: torch.Tensor = torch.tensor([]).to(device)
     with torch.no_grad():
         print("start test")
+        iterator = iter(test_data)
+        current_batch = next(iterator)
         for i, batch in tqdm(test_data):
             batch: Dict[str, Any]
             #event_image = batch["event_volume"].to(device)
@@ -196,7 +201,8 @@ def main(args: DictConfig):
                 # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
                 batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
             if i < test_size -1:
-                batch_slice.append(torch.cat((event_image[-1],test_data[i+1]["event_volume"][0]), dim=0)) 
+                next_batch = next(iterator)
+                batch_slice.append(torch.cat((event_image[-1],next_batch["event_volume"][0]), dim=0)) 
             else:# 最後のペアは同じ画像を2回使用
                 batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
