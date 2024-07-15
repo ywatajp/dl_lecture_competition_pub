@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Dict, Any
 import os
 import time
-import math
 
 class RepresentationType(Enum):
     VOXEL = auto()
@@ -97,8 +96,8 @@ def main(args: DictConfig):
                                  drop_last=False,
                                  num_workers=os.cpu_count(),
                                  pin_memory=True)
-    train_size = math.ceil(train_set.size(0) / args.data_loader.test.batch_size)
-    test_size = math.ceil(test_set.size(0) / args.data_loader.test.batch_size)
+    train_size = len(train_data)
+    test_size = len(test_dat)
     print(train_size, test_size)
     '''
     train data:
