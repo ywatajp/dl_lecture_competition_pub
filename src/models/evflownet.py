@@ -40,6 +40,7 @@ class EVFlowNet(nn.Module):
         # 最後のペアは同じ画像を2回使用
         batch_slice.append(torch.cat((inputs[-1], inputs[-1]), dim=0))
 
+        batch_slice=torch.stack(batch_slice)
         print(batch_slice.size())
         
         # encoder
