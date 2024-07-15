@@ -30,6 +30,7 @@ class EVFlowNet(nn.Module):
                         out_channels=int(_BASE_CHANNELS/2), do_batch_norm=not self._args.no_batch_norm)
 
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        '''
         #print(inputs.size(0),inputs[1])
         batch_size=inputs.size(0)
         batch_slice=[]
@@ -96,31 +97,30 @@ class EVFlowNet(nn.Module):
         #total_flow=0
         flow_dict = {}
         inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
-        inputs, flow0 = self.decoder1(inputs)
-        flow_dict['flow0'] = flow0.clone()
+        inputs, flow = self.decoder1(inputs)
+        flow_dict['flow0'] = flow.clone()
         #total_flow+=flow
         #print(flow.shape)
         
         inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
-        inputs, flow1 = self.decoder2(inputs)
-        flow_dict['flow1'] = flow1.clone()
+        inputs, flow = self.decoder2(inputs)
+        flow_dict['flow1'] = flow.clone()
         #total_flow+=flow
         #print(flow.shape)
 
         inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
-        inputs, flow2 = self.decoder3(inputs)
-        flow_dict['flow2'] = flow2.clone()
+        inputs, flow = self.decoder3(inputs)
+        flow_dict['flow2'] = flow.clone()
         #total_flow+=flow
         #print(flow.shape)
 
         inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
-        inputs, flow3 = self.decoder4(inputs)
-        flow_dict['flow3'] = flow3.clone()
+        inputs, flow = self.decoder4(inputs)
+        flow_dict['flow3'] = flow.clone()
         #total_flow+=flow
         #print(flow.shape)
         
-        return flow3
-        '''
+        return flow
 
 # if __name__ == "__main__":
 #     from config import configs
