@@ -164,8 +164,8 @@ def main(args: DictConfig):
             loss += compute_epe_error(flow['flow2'], ground_truth_flow)
             loss += compute_epe_error(flow['flow1'], ground_truth_flow)
             loss += compute_epe_error(flow['flow0'], ground_truth_flow)
-            for skip in skips:
-                loss += compute_epe_error(skip, ground_truth_flow)
+            #for skip in skips:
+            #    loss += compute_epe_error(skip, ground_truth_flow)
             print(f"batch {i} loss: {loss.item()}")
             optimizer.zero_grad()
             loss.backward()
