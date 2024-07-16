@@ -76,7 +76,7 @@ def main(args: DictConfig):
     loader = DatasetProvider(
         dataset_path=Path(args.dataset_path),
         representation_type=RepresentationType.VOXEL,
-        delta_t_ms=50,
+        delta_t_ms=100,
         num_bins=4
     )
     train_set = loader.get_train_dataset()
