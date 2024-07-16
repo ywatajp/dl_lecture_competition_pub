@@ -45,7 +45,6 @@ class EVFlowNet(nn.Module):
         inputs = self.resnet_block(inputs)
 
         # decoder
-        #total_flow=0
         flow_dict = {}
         inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
         inputs, flow = self.decoder1(inputs)
@@ -68,10 +67,8 @@ class EVFlowNet(nn.Module):
         inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
         inputs, flow = self.decoder4(inputs)
         flow_dict['flow3'] = flow.clone()
-        #total_flow+=flow
-        #print(flow.shape)
         
-        return flow_dict
+        return skip_connections, flow_dict
 
 # if __name__ == "__main__":
 #     from config import configs
