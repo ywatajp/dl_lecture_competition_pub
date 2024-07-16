@@ -87,14 +87,16 @@ def main(args: DictConfig):
                                  shuffle=args.data_loader.train.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 num_workers=os.cpu_count(),
+                                 #num_workers=os.cpu_count(),
+                                 num_workers=2,
                                  pin_memory=True)
     test_data = DataLoader(test_set,
                                  batch_size=args.data_loader.test.batch_size,
                                  shuffle=args.data_loader.test.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 num_workers=os.cpu_count(),
+                                 #num_workers=os.cpu_count(),
+                                 num_workers=2,
                                  pin_memory=True)
     train_size = len(train_data)
     test_size = len(test_data)
@@ -141,11 +143,11 @@ def main(args: DictConfig):
             batch_size = event_image.size(0)  # バッチサイズを取得
             batch_slice=[]
             for j in range(batch_size - 1):
-                print(seq[j],seq[j+1])
-                if seq[j] == seq[j+1]:
+                if seq[j] <= seq[j+1]:
                     # バッチの中から連続する2枚の画像を取り出し、チャネル方向で結合
                     batch_slice.append(torch.cat((event_image[j], event_image[j + 1]), dim=0))
                 else:
+                    print(seq[j],seq[j+1])
                     # 同じ画像を2回使用
                     batch_slice.append(torch.cat((event_image[j], event_image[j]), dim=0)) 
             if i < train_size -1:
@@ -191,7 +193,7 @@ def main(args: DictConfig):
         print("start test")
         iterator = iter(test_data)
         current_batch = next(iterator)
-        for i, batch in tqdm(test_data):
+        for i, batch in enumerate(tqdm(test_data)):
             batch: Dict[str, Any]
             #event_image = batch["event_volume"].to(device)
             event_image = batch["event_volume"] # [B, 4, 480, 640]
