@@ -118,7 +118,7 @@ def main(args: DictConfig):
     model = EVFlowNet(args.train).to(device)
     # 複数GPU使用宣言
     if device == 'cuda':
-        model = torch.nn.DataParallel(model) # make parallel
+        model = torch.nn.DataParallel(model,device_ids=[0,1]) # make parallel
         torch.backends.cudnn.benchmark = True
     
     # ------------------
@@ -180,7 +180,7 @@ def main(args: DictConfig):
     
     current_time = time.strftime("%Y%m%d%H%M%S")
     model_path = f"checkpoints/model_{current_time}.pth"
-    torch.save(model.state_dict(), model_path)
+    torch.save(model.module.state_dict(), model_path)
     print(f"Model saved to {model_path}")
 
     # ------------------
