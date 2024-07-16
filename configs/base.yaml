@@ -6,12 +6,12 @@ data_loader:
     num_voxel_bins: 15
   train:
     batch_size: 8
-    shuffle: false
+    shuffle: False
   test:
     batch_size: 1
-    shuffle: false
+    shuffle: False
 train:
   no_batch_norm: False
   initial_learning_rate: 0.01
   weight_decay: 0.0001
-  epochs: 1
+  epochs: 5
