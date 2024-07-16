@@ -533,7 +533,7 @@ class DatasetProvider:
         train_path = Path(os.path.join(dataset_path, 'eventcamera-train/train'))
         assert dataset_path.is_dir(), str(dataset_path)
         assert test_path.is_dir(), str(test_path)
-        assert delta_t_ms == 100
+        #assert delta_t_ms == 100
         self.config = config
         self.name_mapper_test = []
 
