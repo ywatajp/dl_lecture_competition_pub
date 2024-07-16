@@ -87,16 +87,14 @@ def main(args: DictConfig):
                                  shuffle=args.data_loader.train.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 #num_workers=os.cpu_count(),
-                                 num_workers=2,
+                                 num_workers=os.cpu_count(),
                                  pin_memory=True)
     test_data = DataLoader(test_set,
                                  batch_size=args.data_loader.test.batch_size,
                                  shuffle=args.data_loader.test.shuffle,
                                  collate_fn=collate_fn,
                                  drop_last=False,
-                                 #num_workers=os.cpu_count(),
-                                 num_workers=2,
+                                 num_workers=os.cpu_count(),
                                  pin_memory=True)
     train_size = len(train_data)
     test_size = len(test_data)
@@ -163,9 +161,9 @@ def main(args: DictConfig):
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
             flow = model(event_image) # [B, 2, 480, 640]
             loss: torch.Tensor = compute_epe_error(flow['flow3'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow2'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow1'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow0'], ground_truth_flow)
+            #loss += compute_epe_error(flow['flow2'], ground_truth_flow)
+            #loss += compute_epe_error(flow['flow1'], ground_truth_flow)
+            #loss += compute_epe_error(flow['flow0'], ground_truth_flow)
             print(f"batch {i} loss: {loss.item()}")
             optimizer.zero_grad()
             loss.backward()
