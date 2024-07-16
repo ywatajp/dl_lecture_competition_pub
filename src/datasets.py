@@ -558,7 +558,7 @@ class DatasetProvider:
         for seq in seqs:
             extra_arg = dict()
             train_sequences.append(Sequence(Path(train_path) / seq,
-                                   representation_type, "train", delta_t_ms, num_bins,
+                                   representation_type, 'train', delta_t_ms, num_bins,
                                    #transforms=[],
                                    #name_idx=0,
                                    #visualize=False,
