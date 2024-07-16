@@ -96,9 +96,9 @@ def main(args: DictConfig):
                                  drop_last=False,
                                  num_workers=os.cpu_count(),
                                  pin_memory=True)
-    train_size = len(train_data)
-    test_size = len(test_data)
-    print(train_size, test_size)
+    #train_size = len(train_data)
+    #test_size = len(test_data)
+    #print(train_size, test_size)
     '''
     train data:
         Type of batch: Dict
@@ -118,7 +118,7 @@ def main(args: DictConfig):
     model = EVFlowNet(args.train).to(device)
     # 複数GPU使用宣言
     if device == 'cuda':
-        model = torch.nn.DataParallel(model,device_ids=[0,1]) # make parallel
+        model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
         torch.backends.cudnn.benchmark = True
     
     # ------------------
@@ -136,6 +136,7 @@ def main(args: DictConfig):
         print("on epoch: {}".format(epoch+1))
         for i, batch in enumerate(tqdm(train_data)):
             batch: Dict[str, Any]
+            '''
             event_image = batch["event_volume"] # [B, 4, 480, 640]
             seq = batch["seq_name"]
             batch_size = event_image.size(0)  # バッチサイズを取得
@@ -157,7 +158,8 @@ def main(args: DictConfig):
             else: # 同じ画像を2回使用
                 batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
-            #event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
+            '''
+            event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
             skips, flow = model(event_image) # [B, 2, 480, 640]
             loss: torch.Tensor = compute_epe_error(flow['flow3'], ground_truth_flow)
@@ -177,10 +179,11 @@ def main(args: DictConfig):
     # Create the directory if it doesn't exist
     if not os.path.exists('checkpoints'):
         os.makedirs('checkpoints')
-    
+
+    model.to("cpu")
     current_time = time.strftime("%Y%m%d%H%M%S")
     model_path = f"checkpoints/model_{current_time}.pth"
-    torch.save(model.module.state_dict(), model_path)
+    torch.save(model.state_dict(), model_path)
     print(f"Model saved to {model_path}")
 
     # ------------------
@@ -188,6 +191,12 @@ def main(args: DictConfig):
     # ------------------
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
+    model.to(device)
+    # 複数GPU使用宣言
+    if device == 'cuda':
+        model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
+        torch.backends.cudnn.benchmark = True
+        
     flow: torch.Tensor = torch.tensor([]).to(device)
     with torch.no_grad():
         print("start test")
@@ -195,7 +204,8 @@ def main(args: DictConfig):
         current_batch = next(iterator)
         for i, batch in enumerate(tqdm(test_data)):
             batch: Dict[str, Any]
-            #event_image = batch["event_volume"].to(device)
+            event_image = batch["event_volume"].to(device)
+            '''
             event_image = batch["event_volume"] # [B, 4, 480, 640]
             batch_size = event_image.size(0)  # バッチサイズを取得
             batch_slice=[]
@@ -208,6 +218,7 @@ def main(args: DictConfig):
             else:# 最後のペアは同じ画像を2回使用
                 batch_slice.append(torch.cat((event_image[-1], event_image[-1]), dim=0)) 
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
+            '''
             batch_skip, batch_flow = model(event_image) # [1, 2, 480, 640]
             flow = torch.cat((flow, batch_flow['flow3']), dim=0)  # [N, 2, 480, 640]
         print("test done")
