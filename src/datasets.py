@@ -318,7 +318,7 @@ class Sequence(Dataset):
     
     def get_data(self, index) -> Dict[str, any]:
         ts_start: int = self.timestamps_flow[index] - self.delta_t_us
-        ts_end: int = self.timestamps_flow[index]
+        ts_end: int = self.timestamps_flow[index] + self.delta_t_us
 
         file_index = self.indices[index]
 
