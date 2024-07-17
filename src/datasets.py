@@ -74,6 +74,13 @@ class EventSlicer:
             t_start_us, t_end_us)
         t_start_ms_idx = self.ms2idx(t_start_ms)
         t_end_ms_idx = self.ms2idx(t_end_ms)
+        
+        if t_start_ms_idx==t_end_ms_idx:
+            if t_start_ms_idx==0:
+                t_end_ms_idx=1
+            else:
+                t_start_ms_idx-=1
+        
         if t_start_ms_idx is None or t_end_ms_idx is None:
             print('Error', 'start', t_start_us, 'end', t_end_us)
             # Cannot guarantee window size anymore
@@ -345,10 +352,10 @@ class Sequence(Dataset):
         x = event_data['x']
         y = event_data['y']
 
-        if x.max()>self.width:
-            print(x.max(),ts_start, ts_end)
-        if y.max()>self.height:
-            print(y.max(),ts_start, ts_end)
+        #if x.max()>self.width:
+        #    print(x.max(),ts_start, ts_end)
+        #if y.max()>self.height:
+        #    print(y.max(),ts_start, ts_end)
         xy_rect = self.rectify_events(x, y)
         x_rect = xy_rect[:, 0]
         y_rect = xy_rect[:, 1]
