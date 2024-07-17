@@ -68,6 +68,7 @@ class EventSlicer:
         # We assume that the times are top-off-day, hence subtract offset:
         t_start_us -= self.t_offset
         t_end_us -= self.t_offset
+        print(t_start_us,t_end_us,self.t_offset)
 
         t_start_ms, t_end_ms = self.get_conservative_window_ms(
             t_start_us, t_end_us)
@@ -317,8 +318,8 @@ class Sequence(Dataset):
         return rectify_map[y, x]
     
     def get_data(self, index) -> Dict[str, any]:
-        ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
-        ts_end: int = self.timestamps_flow[index] + 2*self.delta_t_us
+        ts_start: int = self.timestamps_flow[index] - self.delta_t_us
+        ts_end: int = self.timestamps_flow[index] + 3*self.delta_t_us
 
         file_index = self.indices[index]
 
