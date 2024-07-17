@@ -181,7 +181,7 @@ def main(args: DictConfig):
     if not os.path.exists('checkpoints'):
         os.makedirs('checkpoints')
 
-    #model.to("cpu")
+    model.to("cpu")
     current_time = time.strftime("%Y%m%d%H%M%S")
     model_path = f"checkpoints/model_{current_time}.pth"
     torch.save(model.state_dict(), model_path)
@@ -191,12 +191,12 @@ def main(args: DictConfig):
     #   Start predicting
     # ------------------
     model.load_state_dict(torch.load(model_path, map_location=device))
-    #model.to(device)
+    model.to(device)
     model.eval()
     # 複数GPU使用宣言
-    #if device == 'cuda':
-    #    model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
-    #    torch.backends.cudnn.benchmark = True
+    if device == 'cuda':
+        model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
+        torch.backends.cudnn.benchmark = True
         
     flow: torch.Tensor = torch.tensor([]).to(device)
     with torch.no_grad():
