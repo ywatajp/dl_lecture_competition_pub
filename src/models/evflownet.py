@@ -14,19 +14,23 @@ class EVFlowNet(nn.Module):
         self.encoder2 = general_conv2d(in_channels = _BASE_CHANNELS, out_channels=2*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
         self.encoder3 = general_conv2d(in_channels = 2*_BASE_CHANNELS, out_channels=4*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
         self.encoder4 = general_conv2d(in_channels = 4*_BASE_CHANNELS, out_channels=8*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
+        self.encoder5 = general_conv2d(in_channels = 8*_BASE_CHANNELS, out_channels=16*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
-        self.resnet_block = nn.Sequential(*[build_resnet_block(8*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm) for i in range(2)])
+        self.resnet_block = nn.Sequential(*[build_resnet_block(16*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm) for i in range(2)])
 
-        self.decoder1 = upsample_conv2d_and_predict_flow(in_channels=16*_BASE_CHANNELS,
+        self.decoder1 = upsample_conv2d_and_predict_flow(in_channels=32*_BASE_CHANNELS,
+                        out_channels=8*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
+
+        self.decoder2 = upsample_conv2d_and_predict_flow(in_channels=16*_BASE_CHANNELS+2,
                         out_channels=4*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
-        self.decoder2 = upsample_conv2d_and_predict_flow(in_channels=8*_BASE_CHANNELS+2,
+        self.decoder3 = upsample_conv2d_and_predict_flow(in_channels=8*_BASE_CHANNELS+2,
                         out_channels=2*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
-        self.decoder3 = upsample_conv2d_and_predict_flow(in_channels=4*_BASE_CHANNELS+2,
+        self.decoder4 = upsample_conv2d_and_predict_flow(in_channels=4*_BASE_CHANNELS+2,
                         out_channels=_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
-        self.decoder4 = upsample_conv2d_and_predict_flow(in_channels=2*_BASE_CHANNELS+2,
+        self.decoder5 = upsample_conv2d_and_predict_flow(in_channels=2*_BASE_CHANNELS+2,
                         out_channels=int(_BASE_CHANNELS/2), do_batch_norm=not self._args.no_batch_norm)
 
     def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]: 
@@ -40,33 +44,41 @@ class EVFlowNet(nn.Module):
         skip_connections['skip2'] = inputs.clone()
         inputs = self.encoder4(inputs)
         skip_connections['skip3'] = inputs.clone()
+        inputs = self.encoder5(inputs)
+        skip_connections['skip4'] = inputs.clone()
 
         # transition
         inputs = self.resnet_block(inputs)
 
         # decoder
         flow_dict = {}
-        inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
+        inputs = torch.cat([inputs, skip_connections['skip4']], dim=1)
         inputs, flow = self.decoder1(inputs)
         shape = flow.shape
-        flow = nn.functional.interpolate(flow,size=[shape[2]*8,shape[3]*8],mode='bilinear', align_corners=False)
+        flow = nn.functional.interpolate(flow,size=[shape[2]*16,shape[3]*16],mode='bilinear', align_corners=False)
         flow_dict['flow0'] = flow.clone()
         
-        inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
+        inputs = torch.cat([inputs, skip_connections['skip3']], dim=1)
         inputs, flow = self.decoder2(inputs)
         shape = flow.shape
-        flow = nn.functional.interpolate(flow,size=[shape[2]*4,shape[3]*4],mode='bilinear', align_corners=False)
+        flow = nn.functional.interpolate(flow,size=[shape[2]*8,shape[3]*8],mode='bilinear', align_corners=False)
         flow_dict['flow1'] = flow.clone()
 
-        inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
+        inputs = torch.cat([inputs, skip_connections['skip2']], dim=1)
         inputs, flow = self.decoder3(inputs)
         shape = flow.shape
-        flow = nn.functional.interpolate(flow,size=[shape[2]*2,shape[3]*2],mode='bilinear', align_corners=False)
+        flow = nn.functional.interpolate(flow,size=[shape[2]*4,shape[3]*4],mode='bilinear', align_corners=False)
         flow_dict['flow2'] = flow.clone()
 
-        inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
+        inputs = torch.cat([inputs, skip_connections['skip1']], dim=1)
         inputs, flow = self.decoder4(inputs)
+        shape = flow.shape
+        flow = nn.functional.interpolate(flow,size=[shape[2]*2,shape[3]*2],mode='bilinear', align_corners=False)
         flow_dict['flow3'] = flow.clone()
+
+        inputs = torch.cat([inputs, skip_connections['skip0']], dim=1)
+        inputs, flow = self.decoder5(inputs)
+        flow_dict['flow4'] = flow.clone()
         
         return skip_connections, flow_dict
 
