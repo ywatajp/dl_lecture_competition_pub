@@ -68,7 +68,7 @@ class EventSlicer:
         # We assume that the times are top-off-day, hence subtract offset:
         t_start_us -= self.t_offset
         t_end_us -= self.t_offset
-        print(t_start_us,t_end_us,self.t_offset)
+        #print(t_start_us,t_end_us,self.t_offset)
 
         t_start_ms, t_end_ms = self.get_conservative_window_ms(
             t_start_us, t_end_us)
@@ -345,6 +345,10 @@ class Sequence(Dataset):
         x = event_data['x']
         y = event_data['y']
 
+        if x.max()>self.width:
+            print(x.max(),ts_start, ts_end)
+        if y.max()>self.height:
+            print(y.max(),ts_start, ts_end)
         xy_rect = self.rectify_events(x, y)
         x_rect = xy_rect[:, 0]
         y_rect = xy_rect[:, 1]
