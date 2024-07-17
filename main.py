@@ -162,8 +162,8 @@ def main(args: DictConfig):
             event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
             skips, flow = model(event_image) # [B, 2, 480, 640]
-            loss: torch.Tensor = compute_epe_error(flow['flow4'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow3'], ground_truth_flow)
+            loss: torch.Tensor = compute_epe_error(flow['flow3'], ground_truth_flow)
+            #loss += compute_epe_error(flow['flow3'], ground_truth_flow)
             loss += compute_epe_error(flow['flow2'], ground_truth_flow)
             loss += compute_epe_error(flow['flow1'], ground_truth_flow)
             loss += compute_epe_error(flow['flow0'], ground_truth_flow)
@@ -221,7 +221,7 @@ def main(args: DictConfig):
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
             '''
             batch_skip, batch_flow = model(event_image) # [1, 2, 480, 640]
-            flow = torch.cat((flow, batch_flow['flow4']), dim=0)  # [N, 2, 480, 640]
+            flow = torch.cat((flow, batch_flow['flow3']), dim=0)  # [N, 2, 480, 640]
         print("test done")
     # ------------------
     #  save submission
