@@ -330,7 +330,7 @@ class Sequence(Dataset):
         return rectify_map[y, x]
     
     def get_data(self, index) -> Dict[str, any]:
-        if self.timestamps_flow[index]>2*self.delta_t_us:
+        if index > 0:
             ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
         else:
             ts_start: int = self.timestamps_flow[index] - self.delta_t_us
