@@ -162,7 +162,8 @@ def main(args: DictConfig):
             event_image = batch["event_volume"].to(device) # [B, 4, 480, 640]
             ground_truth_flow = batch["flow_gt"].to(device) # [B, 2, 480, 640]
             skips, flow = model(event_image) # [B, 2, 480, 640]
-            loss: torch.Tensor = compute_epe_error(flow['flow3'], ground_truth_flow)
+            loss: torch.Tensor = compute_epe_error(flow['flow4'], ground_truth_flow)
+            loss += compute_epe_error(flow['flow3'], ground_truth_flow)
             loss += compute_epe_error(flow['flow2'], ground_truth_flow)
             loss += compute_epe_error(flow['flow1'], ground_truth_flow)
             loss += compute_epe_error(flow['flow0'], ground_truth_flow)
@@ -180,7 +181,7 @@ def main(args: DictConfig):
     if not os.path.exists('checkpoints'):
         os.makedirs('checkpoints')
 
-    model.to("cpu")
+    #model.to("cpu")
     current_time = time.strftime("%Y%m%d%H%M%S")
     model_path = f"checkpoints/model_{current_time}.pth"
     torch.save(model.state_dict(), model_path)
@@ -190,12 +191,12 @@ def main(args: DictConfig):
     #   Start predicting
     # ------------------
     model.load_state_dict(torch.load(model_path, map_location=device))
+    #model.to(device)
     model.eval()
-    model.to(device)
     # 複数GPU使用宣言
-    if device == 'cuda':
-        model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
-        torch.backends.cudnn.benchmark = True
+    #if device == 'cuda':
+    #    model = torch.nn.DataParallel(model) # make parallel ,device_ids=[0,1]
+    #    torch.backends.cudnn.benchmark = True
         
     flow: torch.Tensor = torch.tensor([]).to(device)
     with torch.no_grad():
@@ -220,7 +221,7 @@ def main(args: DictConfig):
             event_image = torch.stack(batch_slice).to(device) # [B, 8, 480, 640]
             '''
             batch_skip, batch_flow = model(event_image) # [1, 2, 480, 640]
-            flow = torch.cat((flow, batch_flow['flow3']), dim=0)  # [N, 2, 480, 640]
+            flow = torch.cat((flow, batch_flow['flow4']), dim=0)  # [N, 2, 480, 640]
         print("test done")
     # ------------------
     #  save submission
