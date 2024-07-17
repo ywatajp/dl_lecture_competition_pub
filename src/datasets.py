@@ -148,7 +148,7 @@ class EventSlicer:
 
             # Return same index twice: array[x:x] is empty.
             #return time_array.size, time_array.size
-            return time_array.size-1, time_array.size
+            return time_array.size, time_array.size
         else:
             for idx_from_start in range(0, time_array.size, 1):
                 if time_array[idx_from_start] >= time_start_us:
@@ -171,7 +171,7 @@ class EventSlicer:
         if idx_end > 0:
             assert time_array[idx_end - 1] < time_end_us
         return idx_start, idx_end
-    '''
+    
     def ms2idx(self, time_ms: int) -> int:
         assert time_ms >= 0
         if time_ms >= self.ms_to_idx.size:
@@ -184,7 +184,7 @@ class EventSlicer:
         if time_ms >= self.ms_to_idx.size:
             return self.ms_to_idx.size
         return self.ms_to_idx[time_ms]
-
+    '''
 
 class Sequence(Dataset):
     def __init__(self, seq_path: Path, representation_type: RepresentationType, mode: str = 'test', delta_t_ms: int = 100,
@@ -329,8 +329,17 @@ class Sequence(Dataset):
         return rectify_map[y, x]
     
     def get_data(self, index) -> Dict[str, any]:
-        ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
-        ts_end: int = self.timestamps_flow[index] + 2*self.delta_t_us
+        if self.timestamps_flow[index]>2*self.delta_t_us:
+            ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
+        else:
+            ts_start: int = self.timestamps_flow[index] - self.delta_t_us
+        if self.timestamps_flow[index] + 2*self.delta_t_us > self.timestamps_flow[-1]:
+            if self.timestamps_flow[index] + self.delta_t_us > self.timestamps_flow[-1]:
+                ts_end: int = self.timestamps_flow[index]
+            else:
+                ts_end: int = self.timestamps_flow[index] + self.delta_t_us
+        else:
+            ts_end: int = self.timestamps_flow[index] + 2*self.delta_t_us
 
         file_index = self.indices[index]
 
