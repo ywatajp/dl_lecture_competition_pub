@@ -48,6 +48,7 @@ class EventSlicer:
         self.ms_to_idx = np.asarray(self.h5f['ms_to_idx'], dtype='int64')
 
         self.t_offset = int(h5f['t_offset'][()])
+        print(self.t_offset)
         self.t_final = int(self.events['t'][-1]) + self.t_offset
 
     def get_final_time_us(self):
