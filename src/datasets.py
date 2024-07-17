@@ -75,12 +75,6 @@ class EventSlicer:
         t_start_ms_idx = self.ms2idx(t_start_ms)
         t_end_ms_idx = self.ms2idx(t_end_ms)
         
-        if t_start_ms_idx==t_end_ms_idx:
-            if t_start_ms_idx==0:
-                t_end_ms_idx=1
-            else:
-                t_start_ms_idx-=1
-        
         if t_start_ms_idx is None or t_end_ms_idx is None:
             print('Error', 'start', t_start_us, 'end', t_end_us)
             # Cannot guarantee window size anymore
@@ -95,6 +89,8 @@ class EventSlicer:
         t_end_us_idx = t_start_ms_idx + idx_end_offset
         # Again add t_offset to get gps time
         events['t'] = time_array_conservative[idx_start_offset:idx_end_offset] + self.t_offset
+        if events['t'].size==0:
+            print(t_start_ms, t_end_ms)
         for dset_str in ['p', 'x', 'y']:
             events[dset_str] = np.asarray(
                 self.events[dset_str][t_start_us_idx:t_end_us_idx])
