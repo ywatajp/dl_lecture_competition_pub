@@ -48,7 +48,7 @@ class EventSlicer:
         self.ms_to_idx = np.asarray(self.h5f['ms_to_idx'], dtype='int64')
 
         self.t_offset = int(h5f['t_offset'][()])
-        print(self.t_offset)
+        #print(self.t_offset)
         self.t_final = int(self.events['t'][-1]) + self.t_offset
 
     def get_final_time_us(self):
@@ -582,7 +582,7 @@ class DatasetProvider:
 
         train_sequences: list[Sequence] = []
         for seq in seqs:
-            print(seq)
+            #print(seq)
             extra_arg = dict()
             train_sequences.append(Sequence(Path(train_path) / seq,
                                    representation_type, 'train', delta_t_ms, num_bins,
