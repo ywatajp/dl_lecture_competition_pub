@@ -77,7 +77,7 @@ def main(args: DictConfig):
         dataset_path=Path(args.dataset_path),
         representation_type=RepresentationType.VOXEL,
         delta_t_ms=100,
-        num_bins=8
+        num_bins=32
     )
     train_set = loader.get_train_dataset()
     test_set = loader.get_test_dataset()
