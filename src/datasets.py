@@ -167,11 +167,18 @@ class EventSlicer:
         if idx_end > 0:
             assert time_array[idx_end - 1] < time_end_us
         return idx_start, idx_end
-
+    '''
     def ms2idx(self, time_ms: int) -> int:
         assert time_ms >= 0
         if time_ms >= self.ms_to_idx.size:
             return None
+        return self.ms_to_idx[time_ms]
+    '''
+    def ms2idx(self, time_ms: int) -> int:
+        if time_ms < 0:
+            return 0
+        if time_ms >= self.ms_to_idx.size:
+            return self.ms_to_idx.size
         return self.ms_to_idx[time_ms]
 
 
@@ -318,8 +325,8 @@ class Sequence(Dataset):
         return rectify_map[y, x]
     
     def get_data(self, index) -> Dict[str, any]:
-        ts_start: int = self.timestamps_flow[index] - self.delta_t_us
-        ts_end: int = self.timestamps_flow[index] + 3*self.delta_t_us
+        ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
+        ts_end: int = self.timestamps_flow[index] + 2*self.delta_t_us
 
         file_index = self.indices[index]
 
