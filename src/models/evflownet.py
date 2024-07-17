@@ -21,7 +21,7 @@ class EVFlowNet(nn.Module):
         #self.decoder1 = upsample_conv2d_and_predict_flow(in_channels=32*_BASE_CHANNELS,
         #                out_channels=8*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
-        self.decoder1 = upsample_conv2d_and_predict_flow(in_channels=16*_BASE_CHANNELS+2,
+        self.decoder1 = upsample_conv2d_and_predict_flow(in_channels=16*_BASE_CHANNELS,
                         out_channels=4*_BASE_CHANNELS, do_batch_norm=not self._args.no_batch_norm)
 
         self.decoder2 = upsample_conv2d_and_predict_flow(in_channels=8*_BASE_CHANNELS+2,
