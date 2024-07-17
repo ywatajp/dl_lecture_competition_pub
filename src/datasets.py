@@ -89,8 +89,8 @@ class EventSlicer:
         t_end_us_idx = t_start_ms_idx + idx_end_offset
         # Again add t_offset to get gps time
         events['t'] = time_array_conservative[idx_start_offset:idx_end_offset] + self.t_offset
-        if events['t'].size==0:
-            print(t_start_ms, t_end_ms)
+        #if events['t'].size==0:
+        #    print(t_start_ms, t_end_ms)
         for dset_str in ['p', 'x', 'y']:
             events[dset_str] = np.asarray(
                 self.events[dset_str][t_start_us_idx:t_end_us_idx])
@@ -147,7 +147,8 @@ class EventSlicer:
         if time_array[-1] < time_start_us:
 
             # Return same index twice: array[x:x] is empty.
-            return time_array.size, time_array.size
+            #return time_array.size, time_array.size
+            return time_array.size-1, time_array.size
         else:
             for idx_from_start in range(0, time_array.size, 1):
                 if time_array[idx_from_start] >= time_start_us:
