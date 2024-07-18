@@ -77,7 +77,7 @@ def main(args: DictConfig):
         dataset_path=Path(args.dataset_path),
         representation_type=RepresentationType.VOXEL,
         delta_t_ms=100,
-        num_bins=32
+        num_bins=8
     )
     train_set = loader.get_train_dataset()
     test_set = loader.get_test_dataset()
@@ -164,9 +164,9 @@ def main(args: DictConfig):
             skips, flow = model(event_image) # [B, 2, 480, 640]
             loss: torch.Tensor = compute_epe_error(flow['flow3'], ground_truth_flow)
             #loss += compute_epe_error(flow['flow3'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow2'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow1'], ground_truth_flow)
-            loss += compute_epe_error(flow['flow0'], ground_truth_flow)
+            loss += 0.5*compute_epe_error(flow['flow2'], ground_truth_flow)
+            loss += 0.25*compute_epe_error(flow['flow1'], ground_truth_flow)
+            loss += 0.125*compute_epe_error(flow['flow0'], ground_truth_flow)
             #for skip in skips:
             #    loss += compute_epe_error(skip, ground_truth_flow)
             print(f"batch {i} loss: {loss.item()}")
