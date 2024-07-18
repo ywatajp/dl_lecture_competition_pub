@@ -330,6 +330,13 @@ class Sequence(Dataset):
         return rectify_map[y, x]
     
     def get_data(self, index) -> Dict[str, any]:
+        ts_start: int = self.timestamps_flow[index] - self.delta_t_us
+        if self.timestamps_flow[index] + self.delta_t_us > self.timestamps_flow[-1]:
+            ts_end: int = self.timestamps_flow[index]
+        else:
+            ts_end: int = self.timestamps_flow[index] + self.delta_t_us
+            
+        '''
         if index > 0:
             ts_start: int = self.timestamps_flow[index] - 2*self.delta_t_us
         else:
@@ -341,7 +348,8 @@ class Sequence(Dataset):
                 ts_end: int = self.timestamps_flow[index] + self.delta_t_us
         else:
             ts_end: int = self.timestamps_flow[index] + 2*self.delta_t_us
-
+        '''
+        
         file_index = self.indices[index]
 
         output = {
@@ -555,8 +563,8 @@ class SequenceRecurrent(Sequence):
 class DatasetProvider:
     def __init__(self, dataset_path: Path, representation_type: RepresentationType, delta_t_ms: int = 100, num_bins=4,
                 config=None, visualize=False):
-        test_path = Path(os.path.join(dataset_path, 'eventcamera-test/test'))
-        train_path = Path(os.path.join(dataset_path, 'eventcamera-train/train'))
+        test_path = Path(os.path.join(dataset_path, 'test')) #kaggle 'eventcamera-test/test'
+        train_path = Path(os.path.join(dataset_path, 'train')) #kaggle 'eventcamera-train/train'
         assert dataset_path.is_dir(), str(dataset_path)
         assert test_path.is_dir(), str(test_path)
         assert delta_t_ms == 100
